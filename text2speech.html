@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文本转语音转换器</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1), 0 0 0 1px rgba(255,255,255,0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        h1 {
+            color: #1d1d1f;
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.5rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+        
+        .form-group {
+            margin-bottom: 24px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #1d1d1f;
+            font-size: 1rem;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 16px;
+            border: 2px solid #e5e5e7;
+            border-radius: 12px;
+            resize: vertical;
+            font-family: inherit;
+            font-size: 16px;
+            background: #fbfbfd;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+        
+        textarea:focus {
+             border-color: #007aff;
+             background: #ffffff;
+             box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+         }
+         
+         select {
+             width: 100%;
+             padding: 16px;
+             border: 2px solid #e5e5e7;
+             border-radius: 12px;
+             font-family: inherit;
+             font-size: 16px;
+             background: #fbfbfd;
+             transition: all 0.2s ease;
+             outline: none;
+             cursor: pointer;
+             -webkit-appearance: none;
+             -moz-appearance: none;
+             appearance: none;
+             background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 5"><path fill="%23666" d="M2 0L0 2h4zm0 5L0 3h4z"/></svg>');
+             background-repeat: no-repeat;
+             background-position: right 16px center;
+             background-size: 12px;
+         }
+         
+         select:focus {
+             border-color: #007aff;
+             background: #ffffff;
+             box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+         }
+        
+        .voice-settings {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+            padding: 24px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .setting-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .setting-group label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0;
+            font-size: 0.9rem;
+        }
+        
+        .setting-group label span {
+            background: #007aff;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            min-width: 40px;
+            text-align: center;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e5e5e7;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #007aff;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 122, 255, 0.3);
+            transition: all 0.2s ease;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #007aff;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 6px rgba(0, 122, 255, 0.3);
+        }
+        
+        button {
+            background: linear-gradient(135deg, #007aff 0%, #0051d5 100%);
+            color: white;
+            padding: 16px 32px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 17px;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 16px rgba(0, 122, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 122, 255, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        #generateBtn {
+            background: linear-gradient(135deg, #007AFF, #0056CC);
+            box-shadow: 0 4px 15px rgba(0, 122, 255, 0.3);
+        }
+        
+        #generateBtn:hover {
+            box-shadow: 0 6px 20px rgba(0, 122, 255, 0.4);
+        }
+        
+        #downloadBtn {
+            background: linear-gradient(135deg, #FF9500, #FF8C00);
+            box-shadow: 0 4px 15px rgba(255, 149, 0, 0.3);
+        }
+        
+        #downloadBtn:hover {
+            box-shadow: 0 6px 20px rgba(255, 149, 0, 0.4);
+        }
+        
+        button:disabled {
+            background: #e5e5e7;
+            color: #86868b;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .status {
+            margin-top: 24px;
+            padding: 16px;
+            border-radius: 12px;
+            display: none;
+            font-weight: 500;
+        }
+        
+        .status.success {
+            background: rgba(52, 199, 89, 0.1);
+            color: #30d158;
+            border: 1px solid rgba(52, 199, 89, 0.2);
+        }
+        
+        .status.error {
+            background: rgba(255, 59, 48, 0.1);
+            color: #ff3b30;
+            border: 1px solid rgba(255, 59, 48, 0.2);
+        }
+        
+        .loading {
+            text-align: center;
+            color: #86868b;
+        }
+        
+        @media (max-width: 600px) {
+            body {
+                padding: 16px;
+            }
+            
+            .container {
+                padding: 24px;
+                border-radius: 16px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .voice-settings {
+                grid-template-columns: 1fr;
+                gap: 16px;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>文本转语音</h1>
+        
+        <div class="form-group">
+            <label for="textInput">输入要转换的文本：</label>
+            <textarea id="textInput" placeholder="在这里输入您的文本...">真正的危险不是计算机开始像人一样思考，而是人开始像计算机一样思考。计算机只能帮助我们完成简单的任务。</textarea>
+        </div>
+        
+        <div class="form-group">
+                <label for="voiceSelect">声音：</label>
+                <select id="voiceSelect">
+                    <option value="moss_audio_ec78a7c0-321d-11f0-9641-faec05e4a37f">徐晓阳</option>
+                    <option value="moss_audio_f58f712d-ded5-11f0-ac4b-629a40f24c2a">地理2</option>
+                    <option value="moss_audio_d53db85a-dee1-11f0-b79a-d6d2eda9b847">地理3</option>
+                </select>
+            </div>
+         
+         <div class="form-group">
+                <label for="emotionSelect">情感：</label>
+                <select id="emotionSelect">
+                    <option value="neutral">中性</option>
+                    <option value="happy">开心</option>
+                    <option value="sad">悲伤</option>
+                    <option value="angry">愤怒</option>
+                    <option value="fearful">恐惧</option>
+                    <option value="disgusted">厌恶</option>
+                    <option value="surprised">惊讶</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="modelSelect">模型：</label>
+                <select id="modelSelect">
+                    <option value="speech-2.5-hd-preview">Speech 2.5 HD Preview</option>
+                    <option value="speech-02-hd">Speech 02 HD</option>
+                </select>
+            </div>
+        
+        <div class="voice-settings">
+            <div class="setting-group">
+                <label for="speedRange">语速 <span id="speedValue">1.0</span></label>
+                <input type="range" id="speedRange" min="0.5" max="2.0" step="0.01" value="1.0">
+            </div>
+            
+            <div class="setting-group">
+                 <label for="volumeRange">音量 <span id="volumeValue">1.0</span></label>
+                 <input type="range" id="volumeRange" min="0.1" max="2.0" step="0.01" value="1.0">
+             </div>
+             
+             <div class="setting-group">
+                 <label for="pitchRange">音调 <span id="pitchValue">0</span></label>
+                 <input type="range" id="pitchRange" min="-12" max="12" step="0.1" value="0">
+             </div>
+        </div>
+        
+        <button id="generateBtn">生成语音</button>
+        
+        <div id="status" class="status"></div>
+        
+        <div id="audioActions" style="display: none; margin-top: 20px;">
+            <div id="audioPlayer" style="margin-bottom: 16px;">
+                <audio controls style="width: 100%; border-radius: 12px;">
+                    <source id="audioSource" src="" type="audio/mpeg">
+                    您的浏览器不支持音频播放。
+                </audio>
+            </div>
+            <button id="downloadBtn" onclick="downloadAudio()" style="width: 100%;">下载音频</button>
+        </div>
+    </div>
+
+    <script>
+    	// Text to Speech using Minimax API - JavaScript version with jQuery
+
+const groupId = "1870939861280624929";
+const apiKey = "sk-api-2jWlpsYZjs9hEEd8aKDLszBE1ps0qHHMx-XsOFkNDisZE2mM_hLEC6JLbdfBIBo30tf9nhzhBrHCZXBsFFskkrMFXzMACyitVe9Xq1EIZnNl845S9fKgCJ0";
+
+const url = `https://api.minimax.io/v1/t2a_v2?GroupId=${groupId}`;
+
+const payload = {
+  "model": "speech-2.5-hd-preview",
+  "text": "The real danger is not that computers start thinking like people, but that people start thinking like computers. Computers can only help us with simple tasks.",
+  "stream": false,
+  "voice_setting": {
+    "voice_id": "moss_audio_ec78a7c0-321d-11f0-9641-faec05e4a37f",
+    "speed": 1,
+    "vol": 1,
+    "pitch": 0
+  },
+  "audio_setting": {
+    "sample_rate": 32000,
+    "bitrate": 128000,
+    "format": "mp3",
+    "channel": 1
+  }
+};
+
+const headers = {
+  'Authorization': `Bearer ${apiKey}`,
+  'Content-Type': 'application/json'
+};
+
+// Function to convert hex string to Uint8Array
+function hexToBytes(hex) {
+  const bytes = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < hex.length; i += 2) {
+    bytes[i / 2] = parseInt(hex.substr(i, 2), 16);
+  }
+  return bytes;
+}
+
+// Function to download file
+function downloadFile(data, filename, mimeType) {
+  const blob = new Blob([data], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// Main function to convert text to speech
+function convertTextToSpeech() {
+  $.ajax({
+    url: url,
+    type: 'POST',
+    headers: headers,
+    data: JSON.stringify(payload),
+    contentType: 'application/json',
+    success: function(response) {
+      console.log('API Response:', response);
+      
+      // Get audio data from response
+      const audioHex = response.data.audio;
+      const audioBytes = hexToBytes(audioHex);
+      
+      // Download the audio file
+      downloadFile(audioBytes, 'output.mp3', 'audio/mpeg');
+      
+      console.log('Audio file downloaded successfully!');
+    },
+    error: function(xhr, status, error) {
+      console.error('Error:', error);
+      console.error('Status:', status);
+      console.error('Response:', xhr.responseText);
+    }
+  });
+}
+
+// Alternative using fetch API (if you prefer not to use jQuery)
+function convertTextToSpeechFetch() {
+  fetch(url, {
+    method: 'POST',
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.json();
+  })
+  .then(data => {
+    console.log('API Response:', data);
+    
+    // Get audio data from response
+    const audioHex = data.data.audio;
+    const audioBytes = hexToBytes(audioHex);
+    
+    // Download the audio file
+    downloadFile(audioBytes, 'output.mp3', 'audio/mpeg');
+    
+    console.log('Audio file downloaded successfully!');
+  })
+  .catch(error => {
+    console.error('Error:', error);
+  });
+}
+
+// Example usage with jQuery
+$(document).ready(function() {
+  // Add a button to trigger the conversion
+  $('body').append('<button style="display:none" id="convertBtn">Convert Text to Speech</button>');
+  
+  $('#convertBtn').click(function() {
+    console.log('Starting text to speech conversion...');
+    convertTextToSpeech();
+  });
+});
+
+// Export functions for use in other modules
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    convertTextToSpeech,
+    convertTextToSpeechFetch,
+    hexToBytes,
+    downloadFile
+  };
+}
+    </script>
+    <script>
+        // Update range values display
+        $('#speedRange').on('input', function() {
+            $('#speedValue').text(parseFloat($(this).val()).toFixed(2));
+        });
+        
+        $('#volumeRange').on('input', function() {
+             $('#volumeValue').text(parseFloat($(this).val()).toFixed(2));
+         });
+         
+         $('#pitchRange').on('input', function() {
+             $('#pitchValue').text(parseFloat($(this).val()).toFixed(1));
+         });
+        
+        // Override the default payload with user input
+        function getCustomPayload() {
+            return {
+                "model": $('#modelSelect').val(),
+                "text": $('#textInput').val(),
+                "stream": false,
+                "voice_setting": {
+                    "voice_id": $('#voiceSelect').val(),
+                    "speed": parseFloat($('#speedRange').val()),
+                    "vol": parseFloat($('#volumeRange').val()),
+                    "pitch": parseInt($('#pitchRange').val()),
+                    "emotion": $('#emotionSelect').val()
+                },
+                "audio_setting": {
+                    "sample_rate": 32000,
+                    "bitrate": 128000,
+                    "format": "mp3",
+                    "channel": 1
+                }
+            };
+        }
+        
+        // Custom conversion function with user settings
+        function convertWithUserSettings() {
+            const customPayload = getCustomPayload();
+            
+            if (!customPayload.text.trim()) {
+                showStatus('请输入要转换的文本', 'error');
+                return;
+            }
+            
+            $('#convertBtn').prop('disabled', true).text('转换中...');
+            showStatus('正在转换文本为语音...', 'success');
+            
+            $.ajax({
+                url: url,
+                type: 'POST',
+                headers: headers,
+                data: JSON.stringify(customPayload),
+                contentType: 'application/json',
+                success: function(response) {
+                    console.log('API Response:', response);
+                    
+                    // Get audio data from response
+                    const audioHex = response.data.audio;
+                    const audioBytes = hexToBytes(audioHex);
+                    
+                    // Download the audio file
+                    downloadFile(audioBytes, 'output.mp3', 'audio/mpeg');
+                    
+                    showStatus('音频文件下载成功！', 'success');
+                    console.log('Audio file downloaded successfully!');
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    console.error('Status:', status);
+                    console.error('Response:', xhr.responseText);
+                    showStatus('转换失败，请重试', 'error');
+                },
+                complete: function() {
+                    $('#convertBtn').prop('disabled', false).text('转换为语音');
+                }
+            });
+        }
+        
+        function showStatus(message, type) {
+            $('#status').removeClass('success error').addClass(type).text(message).show();
+        }
+        
+        let currentAudioBlob = null;
+        
+        // Generate audio function
+        function generateAudio() {
+            const customPayload = getCustomPayload();
+            
+            if (!customPayload.text.trim()) {
+                showStatus('请输入要转换的文本', 'error');
+                return;
+            }
+            
+            $('#generateBtn').prop('disabled', true).text('生成中...');
+            $('#audioActions').hide();
+            showStatus('正在生成语音...', 'success');
+            
+            $.ajax({
+                url: url,
+                type: 'POST',
+                headers: headers,
+                data: JSON.stringify(customPayload),
+                contentType: 'application/json',
+                success: function(response) {
+                    console.log('API Response:', response);
+                    
+                    // Get audio data from response
+                    const audioHex = response.data.audio;
+                    const audioBytes = hexToBytes(audioHex);
+                    
+                    // Create blob and URL
+                    currentAudioBlob = new Blob([audioBytes], { type: 'audio/mpeg' });
+                    const audioUrl = URL.createObjectURL(currentAudioBlob);
+                    
+                    // Set audio source and show actions
+                    const audioElement = document.querySelector('#audioPlayer audio');
+                    $('#audioSource').attr('src', audioUrl);
+                    
+                    // Wait for audio to load before showing actions
+                    audioElement.addEventListener('loadeddata', function() {
+                        $('#audioActions').show();
+                        showStatus('语音生成完成！您可以播放预览或直接下载。', 'success');
+                        console.log('Audio generated and loaded successfully!');
+                    }, { once: true });
+                    
+                    // Force load the audio
+                    audioElement.load();
+                    
+                    // Fallback: show actions after a short delay if loadeddata doesn't fire
+                    setTimeout(function() {
+                        if ($('#audioActions').is(':hidden')) {
+                            $('#audioActions').show();
+                            showStatus('语音生成完成！您可以播放预览或直接下载。', 'success');
+                        }
+                    }, 1000);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    console.error('Status:', status);
+                    console.error('Response:', xhr.responseText);
+                    showStatus('语音生成失败，请重试', 'error');
+                },
+                complete: function() {
+                    $('#generateBtn').prop('disabled', false).text('生成语音');
+                }
+            });
+        }
+        
+        // Download audio function
+        function downloadAudio() {
+            if (currentAudioBlob) {
+                const url = URL.createObjectURL(currentAudioBlob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'output.mp3';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showStatus('文件下载完成！', 'success');
+            }
+        }
+        
+        // Replace the default button click handlers
+        $(document).ready(function() {
+            $('#generateBtn').on('click', generateAudio);
+        });
+    </script>
+</body>
+</html>
